@@ -149,7 +149,7 @@ export function SearchBar({
   };
 
   return (
-    <div ref={containerRef} className="w-full relative z-30">
+    <div ref={containerRef} className="w-full relative z-50">
       <div className="bg-white rounded-2xl md:rounded-3xl p-2 md:p-2.5 shadow-2xl border border-slate-200">
         <form
           onSubmit={handleSearch}
@@ -177,13 +177,13 @@ export function SearchBar({
               />
             </div>
 
-            {/* Nearby button (exact match from screenshot) */}
+            {/* Nearby button */}
             <button
               type="button"
               onClick={handleNearby}
               className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-1.5 rounded-full shrink-0 border border-slate-300 transition-colors shadow-2xs"
             >
-              <Navigation className="w-3.5 h-3.5 text-[#ff4b38]" />
+              <Navigation className="w-3.5 h-3.5 text-[#f97316]" />
               <span>Nearby</span>
             </button>
 
@@ -249,7 +249,7 @@ export function SearchBar({
                   <button
                     type="button"
                     onClick={() => setOpenDropdown(null)}
-                    className="text-xs sm:text-sm font-bold text-[#ff4b38] hover:underline"
+                    className="text-xs sm:text-sm font-bold text-[#0ea5e9] hover:underline"
                   >
                     Done
                   </button>
@@ -287,10 +287,10 @@ export function SearchBar({
                               onClick={() => handleDateClick(dateStr)}
                               className={`h-10 w-10 mx-auto flex items-center justify-center rounded-full text-sm font-bold transition-all cursor-pointer ${
                                 isStart || isEnd
-                                  ? "bg-[#1d64e8] text-white shadow-md shadow-blue-500/40 ring-2 ring-blue-300 scale-105"
+                                  ? "bg-[#0ea5e9] text-white shadow-md shadow-sky-500/40 ring-2 ring-sky-300 scale-105"
                                   : isInRange
-                                  ? "bg-blue-100 text-[#0a2560] font-black rounded-lg"
-                                  : "text-slate-700 hover:bg-blue-50 hover:text-[#0a2560]"
+                                  ? "bg-sky-100 text-[#0284c7] font-black rounded-lg"
+                                  : "text-slate-700 hover:bg-sky-50 hover:text-[#0284c7]"
                               }`}
                             >
                               {day}
@@ -333,10 +333,10 @@ export function SearchBar({
                               onClick={() => handleDateClick(dateStr)}
                               className={`h-10 w-10 mx-auto flex items-center justify-center rounded-full text-sm font-bold transition-all cursor-pointer ${
                                 isStart || isEnd
-                                  ? "bg-[#1d64e8] text-white shadow-md shadow-blue-500/40 ring-2 ring-blue-300 scale-105"
+                                  ? "bg-[#0ea5e9] text-white shadow-md shadow-sky-500/40 ring-2 ring-sky-300 scale-105"
                                   : isInRange
-                                  ? "bg-blue-100 text-[#0a2560] font-black rounded-lg"
-                                  : "text-slate-700 hover:bg-blue-50 hover:text-[#0a2560]"
+                                  ? "bg-sky-100 text-[#0284c7] font-black rounded-lg"
+                                  : "text-slate-700 hover:bg-sky-50 hover:text-[#0284c7]"
                               }`}
                             >
                               {day}
@@ -358,7 +358,7 @@ export function SearchBar({
                   <button
                     type="button"
                     onClick={() => setOpenDropdown(null)}
-                    className="px-6 py-2.5 bg-[#0a2560] hover:bg-blue-900 text-white font-extrabold rounded-xl shadow-md cursor-pointer"
+                    className="px-6 py-2.5 bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-extrabold rounded-xl shadow-md cursor-pointer transition-colors"
                   >
                     Apply Dates
                   </button>
@@ -420,7 +420,7 @@ export function SearchBar({
                           type="button"
                           onClick={() => updateGuests(idx, 1)}
                           disabled={room.guests >= 6}
-                          className="w-8 h-8 rounded-full border border-blue-400 flex items-center justify-center text-blue-600 hover:bg-blue-50 font-black text-base"
+                          className="w-8 h-8 rounded-full border border-sky-400 flex items-center justify-center text-[#0ea5e9] hover:bg-sky-50 font-black text-base"
                         >
                           <Plus className="w-4 h-4" />
                         </button>
@@ -429,13 +429,13 @@ export function SearchBar({
                   ))}
                 </div>
 
-                {/* Actions: Delete Room on left, Add Room on right (matching screenshot 3) */}
+                {/* Actions: Delete Room on left, Add Room on right */}
                 <div className="pt-3.5 border-t border-slate-100 flex items-center justify-between text-sm font-bold">
                   <button
                     type="button"
                     onClick={handleDeleteRoom}
                     disabled={roomList.length <= 1}
-                    className="text-slate-400 hover:text-red-600 disabled:opacity-30 cursor-pointer"
+                    className="text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
                   >
                     Delete Room
                   </button>
@@ -443,7 +443,7 @@ export function SearchBar({
                   <button
                     type="button"
                     onClick={handleAddRoom}
-                    className="text-blue-600 hover:text-blue-800 cursor-pointer text-sm font-bold"
+                    className="text-[#0ea5e9] hover:text-[#0284c7] cursor-pointer text-sm font-bold"
                   >
                     + Add Room
                   </button>
@@ -452,11 +452,11 @@ export function SearchBar({
             )}
           </div>
 
-          {/* 4. Prominent Red/Coral Search Button (Matching screenshots) */}
+          {/* 4. StayUp Brand Light Blue Primary Search Button */}
           <div className="w-full lg:w-auto p-1.5 shrink-0">
             <button
               type="submit"
-              className="w-full lg:w-auto px-10 py-4 rounded-xl lg:rounded-2xl bg-[#e52823] hover:bg-[#cc201b] text-white font-black text-lg md:text-xl tracking-wide shadow-xl shadow-red-600/35 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+              className="w-full lg:w-auto px-10 py-4 rounded-xl lg:rounded-2xl bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-black text-lg md:text-xl tracking-wide shadow-xl shadow-sky-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
               <span>Search</span>
             </button>

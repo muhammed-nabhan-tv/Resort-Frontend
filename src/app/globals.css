@@ -11,12 +11,17 @@
     --primary-ocean-100: #e3edff;
     --primary-ocean-50: #f0f5fc;
 
-    --accent-coral-700: #cc2e1f;
-    --accent-coral-600: #e63827;
-    --accent-coral-500: #ff4b38;
-    --accent-coral-400: #ff6856;
-    --accent-coral-100: #ffe8e5;
-    --accent-coral-50: #fff4f2;
+    --accent-orange-700: #c2410c;
+    --accent-orange-600: #ea580c;
+    --accent-orange-500: #f97316;
+    --accent-orange-400: #fb923c;
+    --accent-orange-100: #ffedd5;
+    --accent-orange-50: #fff7ed;
+
+    --brand-blue: #0ea5e9;
+    --brand-blue-hover: #0284c7;
+    --brand-orange: #f97316;
+    --brand-orange-hover: #ea580c;
 
     --surface-light: #f8fafc;
     --surface-card: #ffffff;
@@ -41,26 +46,47 @@
   color: #0a2560;
 }
 .text-ocean-blue {
-  color: #1444a8;
+  color: #0ea5e9;
 }
 .border-ocean-navy {
   border-color: #0a2560;
 }
 
+/* StayUp Orange & Light Blue Utilities */
+.bg-stayup-blue {
+  background-color: #0ea5e9;
+}
+.bg-stayup-blue-hover:hover {
+  background-color: #0284c7;
+}
+.text-stayup-blue {
+  color: #0ea5e9;
+}
+.bg-stayup-orange {
+  background-color: #f97316;
+}
+.bg-stayup-orange-hover:hover {
+  background-color: #ea580c;
+}
+.text-stayup-orange {
+  color: #f97316;
+}
+
+/* Backward compatibility mapping from old coral to StayUp orange */
 .bg-coral {
-  background-color: #ff4b38;
+  background-color: #f97316;
 }
 .bg-coral-hover:hover {
-  background-color: #e63827;
+  background-color: #ea580c;
 }
 .bg-coral-light {
-  background-color: #ffe8e5;
+  background-color: #fff7ed;
 }
 .text-coral {
-  color: #ff4b38;
+  color: #f97316;
 }
 .border-coral {
-  border-color: #ff4b38;
+  border-color: #f97316;
 }
 
 /* Smooth custom scrollbars */

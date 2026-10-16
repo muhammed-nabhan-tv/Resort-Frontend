@@ -10,7 +10,7 @@ export function PublicFooter() {
       <div className="border-b border-slate-800/80 bg-[#051333] py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-950/70 border border-blue-700/50 flex items-center justify-center text-[#ff4b38] shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-blue-950/70 border border-blue-700/50 flex items-center justify-center text-[#f97316] shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
@@ -19,7 +19,7 @@ export function PublicFooter() {
             </div>
           </div>
           <div className="flex items-center justify-center md:justify-start gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-950/70 border border-blue-700/50 flex items-center justify-center text-[#ff4b38] shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-blue-950/70 border border-blue-700/50 flex items-center justify-center text-[#0284c7] shrink-0">
               <Compass className="w-5 h-5" />
             </div>
             <div>
@@ -28,7 +28,7 @@ export function PublicFooter() {
             </div>
           </div>
           <div className="flex items-center justify-center md:justify-start gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-950/70 border border-blue-700/50 flex items-center justify-center text-[#ff4b38] shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-blue-950/70 border border-blue-700/50 flex items-center justify-center text-[#f97316] shrink-0">
               <Heart className="w-5 h-5" />
             </div>
             <div>
@@ -44,12 +44,12 @@ export function PublicFooter() {
           {/* Brand info */}
           <div className="lg:col-span-2 space-y-5">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#1444a8] to-[#2563eb] flex items-center justify-center text-white shadow-md">
-                <Compass className="w-7 h-7 text-[#ff4b38]" />
-              </div>
-              <span className="text-2xl font-black tracking-tight text-white">
-                Stay<span className="text-[#ff4b38]">Up</span>
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo/stayup_logo.png"
+                alt="StayUp Resorts"
+                className="h-10 w-auto object-contain brightness-110"
+              />
             </div>
             <p className="text-base text-slate-300 max-w-md leading-relaxed">
               Discover top rated value stays, luxury resorts, private pool villas, and mountain chalets handpicked
@@ -57,15 +57,15 @@ export function PublicFooter() {
             </p>
             <div className="space-y-2.5 text-sm text-slate-300">
               <div className="flex items-center gap-2.5">
-                <MapPin className="w-4 h-4 text-[#ff4b38] shrink-0" />
+                <MapPin className="w-4 h-4 text-[#f97316] shrink-0" />
                 <span>Global Headquarters: Marina Coastal Walk, Tower 2</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-[#ff4b38] shrink-0" />
+                <Phone className="w-4 h-4 text-[#0284c7] shrink-0" />
                 <span>24/7 Helpline: 0124-6201611 • +1 (800) 428-7200</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-[#ff4b38] shrink-0" />
+                <Mail className="w-4 h-4 text-[#f97316] shrink-0" />
                 <span>support@stayup.com</span>
               </div>
             </div>
