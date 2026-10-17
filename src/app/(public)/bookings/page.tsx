@@ -54,11 +54,11 @@ export default function CustomerBookingsPage() {
         </div>
 
         <Link
-          href="/resorts"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#ff4b38] hover:bg-[#e63827] text-white text-xs font-bold transition-colors shadow-xs"
+          href="/"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#0ea5e9] hover:bg-[#0284c7] text-white text-xs font-bold transition-colors shadow-xs"
         >
-          <Compass className="w-4 h-4" />
-          <span>Book Another Resort</span>
+          <Compass className="w-4 h-4 text-[#f97316]" />
+          <span>Find A Resort</span>
         </Link>
       </div>
 
@@ -191,18 +191,23 @@ export default function CustomerBookingsPage() {
             </div>
           ))
         ) : (
-          <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-4">
-            <Calendar className="w-12 h-12 text-slate-300 mx-auto" />
-            <h3 className="text-base font-bold text-slate-800">No Reservations Found</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              You do not have any {activeTab === "all" ? "" : activeTab} bookings recorded yet.
+          <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/90 shadow-xs space-y-4 max-w-lg mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#0ea5e9] flex items-center justify-center mx-auto mb-2 shadow-2xs">
+              <Calendar className="w-8 h-8 text-[#0ea5e9]" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800">No Reservations Found</h3>
+            <p className="text-sm text-slate-500 max-w-sm mx-auto font-medium">
+              You do not have any {activeTab === "all" ? "" : activeTab} bookings recorded yet. New bookings will appear here after confirmation.
             </p>
-            <Link
-              href="/resorts"
-              className="inline-block px-5 py-2.5 rounded-full bg-[#0a2560] text-white text-xs font-bold hover:bg-blue-900 transition-colors"
-            >
-              Explore Resorts
-            </Link>
+            <div className="pt-2">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0ea5e9] hover:bg-[#0284c7] text-white text-xs font-bold transition-all shadow-md shadow-sky-500/20"
+              >
+                <span>Find Your Next Stay</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         )}
       </div>

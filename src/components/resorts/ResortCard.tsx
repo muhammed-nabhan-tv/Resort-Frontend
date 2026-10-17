@@ -34,7 +34,7 @@ export function ResortCard({ resort, checkIn, checkOut }: ResortCardProps) {
         {/* Top Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
           <span className="inline-flex items-center gap-1 bg-white/95 backdrop-blur-xs text-xs font-semibold px-2.5 py-1 rounded-full text-[#0a2560] shadow-sm">
-            <Sparkles className="w-3 h-3 text-[#ff4b38]" />
+            <Sparkles className="w-3 h-3 text-[#f97316]" />
             <span className="capitalize">{resort.category}</span>
           </span>
 
@@ -48,7 +48,7 @@ export function ResortCard({ resort, checkIn, checkOut }: ResortCardProps) {
         {/* Bottom image overlay info */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-xs">
           <div className="flex items-center gap-1 font-medium drop-shadow-sm">
-            <MapPin className="w-3.5 h-3.5 text-[#ff4b38]" />
+            <MapPin className="w-3.5 h-3.5 text-[#f97316]" />
             <span className="truncate">{resort.destination}, {resort.country}</span>
           </div>
           <span className="bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded-sm text-[11px]">
@@ -61,7 +61,7 @@ export function ResortCard({ resort, checkIn, checkOut }: ResortCardProps) {
       <div className="p-6 flex-1 flex flex-col justify-between">
         <div>
           <Link href={detailUrl} className="block group/title">
-            <h3 className="font-black text-slate-900 text-xl sm:text-2xl leading-snug group-hover/title:text-[#0a2560] transition-colors line-clamp-1">
+            <h3 className="font-black text-slate-900 text-xl sm:text-2xl leading-snug group-hover/title:text-[#0284c7] transition-colors line-clamp-1">
               {resort.name}
             </h3>
           </Link>
@@ -120,7 +120,7 @@ export function ResortCard({ resort, checkIn, checkOut }: ResortCardProps) {
             </Link>
             <Link
               href={bookingUrl}
-              className="inline-flex items-center justify-center gap-1.5 text-sm font-black px-5 py-2.5 rounded-xl bg-[#e52823] hover:bg-[#cc201b] text-white shadow-md shadow-red-600/30 transition-all cursor-pointer active:scale-98"
+              className="inline-flex items-center justify-center gap-1.5 text-sm font-black px-5 py-2.5 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-md shadow-sky-600/20 transition-all cursor-pointer active:scale-98"
             >
               <span>Book</span>
               <ArrowRight className="w-4 h-4" />

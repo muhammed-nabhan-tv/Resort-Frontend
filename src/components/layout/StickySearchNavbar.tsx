@@ -7,7 +7,6 @@ import {
   Search,
   CalendarDays,
   Users,
-  Compass,
   ChevronDown,
   Plus,
   Minus,
@@ -37,7 +36,7 @@ export function StickySearchNavbar() {
   const [checkOut, setCheckOut] = useState("2026-10-14");
   const [dateSelectionPhase, setDateSelectionPhase] = useState<"checkIn" | "checkOut">("checkIn");
   const [roomList, setRoomList] = useState<{ id: number; guests: number }[]>([
-    { id: 1, guests: 2 },
+    { id: 1, guests: 1 },
   ]);
 
   const navRef = useRef<HTMLDivElement>(null);
@@ -56,7 +55,8 @@ export function StickySearchNavbar() {
   // Listen to scroll to dock navbar
   useEffect(() => {
     function handleScroll() {
-      if (window.scrollY > 280) {
+      // Show when scrolled past 350px
+      if (window.scrollY > 350) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -96,7 +96,13 @@ export function StickySearchNavbar() {
     params.set("rooms", totalRooms.toString());
 
     setOpenDropdown(null);
-    router.push(`/home?${params.toString()}`);
+    router.push(`/resorts?${params.toString()}`);
+  };
+
+  const handleNearby = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDestination("Bali, Indonesia");
+    setOpenDropdown(null);
   };
 
   const handleAddRoom = () => {
@@ -129,7 +135,7 @@ export function StickySearchNavbar() {
       const f2 = d2.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
       return `${f1}  -  ${f2}`;
     } catch {
-      return `${inDate} - ${outDate}`;
+      return `${inDate} - ${outDate || "Select check-out"}`;
     }
   };
 
@@ -138,38 +144,35 @@ export function StickySearchNavbar() {
   return (
     <div
       ref={navRef}
-      className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-lg transition-all duration-300 transform translate-y-0"
+      className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-md transition-all duration-300 transform translate-y-0"
     >
       <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-12 py-2.5">
         <form
           onSubmit={handleSearch}
           className="flex items-center justify-between gap-3 flex-wrap lg:flex-nowrap"
         >
-          {/* Brand mark */}
+          {/* StayUp Brand mark on Left */}
           <Link href="/" className="flex items-center gap-2 shrink-0 group">
-            <div className="w-9 h-9 rounded-xl bg-[#0a2560] flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
-              <Compass className="w-5 h-5 text-[#ff4b38]" />
-            </div>
-            <span className="text-xl font-black tracking-tight text-[#0a2560] hidden sm:inline">
-              Stay<span className="text-[#ff4b38]">Up</span>
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo/stayup_logo.png"
+              alt="StayUp Resorts & Stays"
+              className="h-8 sm:h-9 w-auto object-contain group-hover:scale-102 transition-transform"
+            />
           </Link>
 
-          {/* Stretchy Selection Bar */}
+          {/* Stretchy Selection Bar (Replicating user reference screenshot 3) */}
           <div className="flex-1 flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-1 divide-x divide-slate-200 shadow-inner">
-            {/* 1. Destination Input */}
+            {/* 1. Destination Input with Search Icon & Nearby Pill */}
             <div
-              className="flex-1 min-w-[150px] px-3.5 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-white rounded-xl transition-colors relative"
+              className="flex-1 min-w-[160px] px-3.5 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-white rounded-xl transition-colors relative"
               onClick={() => setOpenDropdown(openDropdown === "destination" ? null : "destination")}
             >
               <Search className="w-4 h-4 text-slate-400 shrink-0" />
               <div className="flex-1 min-w-0">
-                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Where to?
-                </span>
                 <input
                   type="text"
-                  placeholder="Anywhere (Bali, Dubai, Goa)"
+                  placeholder="Where to? (e.g. Bali, Dubai, Goa)"
                   value={destination}
                   onChange={(e) => {
                     setDestination(e.target.value);
@@ -178,6 +181,16 @@ export function StickySearchNavbar() {
                   className="w-full bg-transparent text-sm font-bold text-slate-900 placeholder-slate-400 focus:outline-hidden truncate"
                 />
               </div>
+
+              {/* Nearby pill button */}
+              <button
+                type="button"
+                onClick={handleNearby}
+                className="shrink-0 hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-slate-200 text-[11px] font-bold text-slate-700 hover:border-[#0ea5e9] hover:text-[#0ea5e9] transition-colors"
+              >
+                <Navigation className="w-2.5 h-2.5 text-[#f97316]" />
+                <span>Nearby</span>
+              </button>
 
               {/* Destination Dropdown */}
               {openDropdown === "destination" && (
@@ -197,7 +210,7 @@ export function StickySearchNavbar() {
                           setDestination(loc);
                           setOpenDropdown(null);
                         }}
-                        className="w-full text-left px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-blue-50 hover:text-[#0a2560] rounded-lg transition-colors flex items-center justify-between"
+                        className="w-full text-left px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-sky-50 hover:text-[#0ea5e9] rounded-lg transition-colors flex items-center justify-between"
                       >
                         <span>{loc}</span>
                         <span className="text-[10px] text-slate-400">Resorts</span>
@@ -208,16 +221,13 @@ export function StickySearchNavbar() {
               )}
             </div>
 
-            {/* 2. Selecting Date Navbar (Calendar matching Screenshot 2) */}
+            {/* 2. Selecting Date Navbar (Calendar matching Screenshot 3) */}
             <div
               className="flex-1 min-w-[200px] px-3.5 py-1.5 flex items-center justify-between cursor-pointer hover:bg-white rounded-xl transition-colors relative"
               onClick={() => setOpenDropdown(openDropdown === "calendar" ? null : "calendar")}
             >
               <div className="min-w-0 flex-1">
-                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Check-in / Check-out
-                </span>
-                <span className="block text-sm font-black text-slate-900 truncate">
+                <span className="block text-sm font-bold text-slate-800 truncate">
                   {formatDateDisplay(checkIn, checkOut)}
                 </span>
               </div>
@@ -240,7 +250,7 @@ export function StickySearchNavbar() {
                     <button
                       type="button"
                       onClick={() => setOpenDropdown(null)}
-                      className="text-xs font-bold text-[#ff4b38] hover:underline"
+                      className="text-xs font-bold text-[#0ea5e9] hover:underline"
                     >
                       Done
                     </button>
@@ -272,10 +282,10 @@ export function StickySearchNavbar() {
                                 onClick={() => handleDateClick(dateStr)}
                                 className={`h-8 w-8 mx-auto flex items-center justify-center rounded-full text-xs font-bold transition-all cursor-pointer ${
                                   isStart || isEnd
-                                    ? "bg-[#1d64e8] text-white shadow-md shadow-blue-500/40 ring-2 ring-blue-300"
+                                    ? "bg-[#0ea5e9] text-white shadow-md shadow-sky-500/40 ring-2 ring-sky-300"
                                     : isInRange
-                                    ? "bg-blue-100 text-[#0a2560] font-black rounded-lg"
-                                    : "text-slate-700 hover:bg-blue-50"
+                                    ? "bg-sky-100 text-[#0284c7] font-black rounded-lg"
+                                    : "text-slate-700 hover:bg-sky-50 hover:text-[#0284c7]"
                                 }`}
                               >
                                 {day}
@@ -311,10 +321,10 @@ export function StickySearchNavbar() {
                                 onClick={() => handleDateClick(dateStr)}
                                 className={`h-8 w-8 mx-auto flex items-center justify-center rounded-full text-xs font-bold transition-all cursor-pointer ${
                                   isStart || isEnd
-                                    ? "bg-[#1d64e8] text-white shadow-md shadow-blue-500/40 ring-2 ring-blue-300"
+                                    ? "bg-[#0ea5e9] text-white shadow-md shadow-sky-500/40 ring-2 ring-sky-300"
                                     : isInRange
-                                    ? "bg-blue-100 text-[#0a2560] font-black rounded-lg"
-                                    : "text-slate-700 hover:bg-blue-50"
+                                    ? "bg-sky-100 text-[#0284c7] font-black rounded-lg"
+                                    : "text-slate-700 hover:bg-sky-50 hover:text-[#0284c7]"
                                 }`}
                               >
                                 {day}
@@ -331,7 +341,7 @@ export function StickySearchNavbar() {
                     <button
                       type="button"
                       onClick={() => setOpenDropdown(null)}
-                      className="px-4 py-1.5 bg-[#0a2560] text-white font-bold rounded-lg cursor-pointer"
+                      className="px-4 py-1.5 bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-bold rounded-lg cursor-pointer"
                     >
                       Apply
                     </button>
@@ -346,10 +356,7 @@ export function StickySearchNavbar() {
               onClick={() => setOpenDropdown(openDropdown === "rooms" ? null : "rooms")}
             >
               <div className="min-w-0 flex-1">
-                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Rooms & Guests
-                </span>
-                <span className="block text-sm font-black text-slate-900 truncate">
+                <span className="block text-sm font-bold text-slate-800 truncate">
                   {totalRooms} Room{totalRooms > 1 ? "s" : ""}, {totalGuests} Guest{totalGuests > 1 ? "s" : ""}
                 </span>
               </div>
@@ -391,7 +398,7 @@ export function StickySearchNavbar() {
                             type="button"
                             onClick={() => updateGuests(idx, 1)}
                             disabled={room.guests >= 6}
-                            className="w-7 h-7 rounded-full border border-blue-400 flex items-center justify-center text-blue-600 hover:bg-blue-50 font-bold"
+                            className="w-7 h-7 rounded-full border border-sky-400 flex items-center justify-center text-[#0ea5e9] hover:bg-sky-50 font-bold"
                           >
                             <Plus className="w-3.5 h-3.5" />
                           </button>
@@ -405,14 +412,14 @@ export function StickySearchNavbar() {
                       type="button"
                       onClick={handleDeleteRoom}
                       disabled={roomList.length <= 1}
-                      className="text-slate-400 hover:text-red-600 disabled:opacity-30 cursor-pointer"
+                      className="text-slate-400 hover:text-slate-600 disabled:opacity-30 cursor-pointer"
                     >
                       Delete Room
                     </button>
                     <button
                       type="button"
                       onClick={handleAddRoom}
-                      className="text-blue-600 hover:text-blue-800 cursor-pointer"
+                      className="text-[#0ea5e9] hover:text-[#0284c7] cursor-pointer"
                     >
                       + Add Room
                     </button>
@@ -422,10 +429,10 @@ export function StickySearchNavbar() {
             </div>
           </div>
 
-          {/* Search Button */}
+          {/* Search Button (Light Sky Blue matching StayUp logo theme) */}
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-xl bg-[#e52823] hover:bg-[#cc201b] text-white font-extrabold text-sm tracking-wide shadow-md shadow-red-600/30 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer active:scale-98"
+            className="px-8 py-3 rounded-xl bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-black text-sm sm:text-base tracking-wide shadow-md shadow-sky-500/30 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer active:scale-98"
           >
             <Search className="w-4 h-4" />
             <span>Search</span>
