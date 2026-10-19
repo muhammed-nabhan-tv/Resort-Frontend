@@ -27,14 +27,9 @@ import {
   validatePhone,
   validateOtp,
   getPasswordStrength,
-  apiLogin,
-  apiRegister,
-  apiVerifyOtp,
-  apiResendOtp,
-  saveSession,
   FieldErrors,
 } from "@/lib/auth-service";
-import { CURRENT_MOCK_USER } from "@/data/users";
+import { useAuth } from "@/context/AuthContext";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -44,6 +39,7 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalProps) {
   const router = useRouter();
+  const { login, register, verifyOtp, resendOtp, loginDemoUser } = useAuth();
   const [tab, setTab] = useState<"login" | "signup" | "verify_otp">(defaultTab);
 
   // Form Fields
@@ -92,8 +88,8 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
   const handleQuickLogin = () => {
     setIsSubmitting(true);
     setServerError(null);
-    setSuccessMessage("Logged in as Demo User (Alex Morgan)!");
-    saveSession(CURRENT_MOCK_USER, "demo-token-alex-morgan");
+    setSuccessMessage("Logged in as Demo User!");
+    loginDemoUser();
     setTimeout(() => {
       onClose();
       router.push("/profile");
@@ -147,14 +143,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
 
     try {
       if (tab === "login") {
-        const result = await apiLogin({ email, password });
-        setSuccessMessage(`Welcome back, ${result.user.name}!`);
+        const user = await login({ email, password });
+        setSuccessMessage(`Welcome back, ${user.name}!`);
         setTimeout(() => {
           onClose();
-          router.push(result.user.role === "owner" ? "/profile" : "/bookings");
+          router.push(user.role === "owner" ? "/profile" : "/bookings");
         }, 800);
       } else if (tab === "signup") {
-        const result = await apiRegister({
+        const result = await register({
           name,
           email,
           password,
@@ -168,8 +164,8 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
         setTab("verify_otp");
         setResendCooldown(60);
       } else if (tab === "verify_otp") {
-        await apiVerifyOtp({ email, otp });
-        setSuccessMessage("Email verified successfully! Welcome to StayUp Stays.");
+        const user = await verifyOtp({ email, otp });
+        setSuccessMessage(`Email verified! Welcome, ${user.name}.`);
         setTimeout(() => {
           onClose();
           router.push("/profile");
@@ -193,7 +189,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
     setServerError(null);
     setSuccessMessage(null);
     try {
-      const msg = await apiResendOtp(email);
+      const msg = await resendOtp(email);
       setSuccessMessage(msg);
       setResendCooldown(60);
     } catch (err: any) {
@@ -302,7 +298,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                 className="w-full py-2.5 px-4 rounded-xl bg-[#0a2560] hover:bg-[#1444a8] text-white font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <Zap className="w-4 h-4 text-[#f97316]" />
-                <span>Instant Demo Login (Alex Morgan)</span>
+                <span>Instant Demo Login (Demo User)</span>
               </button>
               <span className="text-[10px] text-slate-500 mt-1 block">
                 Preview member profile and reservations immediately
@@ -315,10 +311,12 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
           {/* ------------------------------------------------------------- */}
           {tab === "verify_otp" ? (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl text-center">
-                <KeyRound className="w-7 h-7 text-[#0a2560] mx-auto mb-1.5" />
-                <p className="text-xs text-slate-600">Enter code sent to:</p>
-                <p className="text-xs font-black text-slate-900">{email}</p>
+              <div className="p-3 bg-sky-50/80 border border-sky-100 rounded-2xl text-center space-y-1">
+                <KeyRound className="w-7 h-7 text-[#0a2560] mx-auto mb-1" />
+                <p className="text-xs font-black text-[#0a2560] uppercase tracking-wider">Gmail Verification</p>
+                <p className="text-xs text-slate-600">OTP code sent via Nodemailer to:</p>
+                <p className="text-xs font-black text-slate-900 bg-white py-1 px-3 rounded-lg border border-slate-200 inline-block">{email}</p>
+                <p className="text-[10px] text-slate-500 pt-0.5">Check your inbox or spam folder</p>
               </div>
 
               <div>
@@ -404,7 +402,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Alex Morgan"
+                      placeholder="e.g. John Doe"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       onBlur={() => handleBlur("name")}
@@ -621,7 +619,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                     ? "Processing..."
                     : tab === "login"
                     ? "Sign In to StayUp"
-                    : "Create Account & Verify"}
+                    : "Create Account & Send OTP to Gmail"}
                 </span>
                 <ArrowRight className="w-4 h-4" />
               </button>

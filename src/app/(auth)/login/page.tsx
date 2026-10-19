@@ -26,18 +26,14 @@ import {
   validatePhone,
   validateOtp,
   getPasswordStrength,
-  apiLogin,
-  apiRegister,
-  apiVerifyOtp,
-  apiResendOtp,
-  saveSession,
   FieldErrors,
 } from "@/lib/auth-service";
-import { CURRENT_MOCK_USER } from "@/data/users";
+import { useAuth } from "@/context/AuthContext";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { login, register, verifyOtp, resendOtp, loginDemoUser } = useAuth();
 
   // Tabs: 'login' | 'signup' | 'verify_otp'
   const initialTab = searchParams.get("tab") === "signup" ? "signup" : "login";
@@ -146,8 +142,8 @@ function LoginForm() {
   const handleDemoLogin = () => {
     setIsSubmitting(true);
     setServerError(null);
-    setSuccessMessage("Authenticated as Demo User (Alex Morgan)!");
-    saveSession(CURRENT_MOCK_USER, "demo-token-alex-morgan");
+    setSuccessMessage("Authenticated as Demo User!");
+    loginDemoUser();
     setTimeout(() => {
       router.push("/profile");
     }, 700);
@@ -201,13 +197,13 @@ function LoginForm() {
 
     try {
       if (tab === "login") {
-        const result = await apiLogin({ email, password });
-        setSuccessMessage(`Welcome back, ${result.user.name}! Redirecting...`);
+        const user = await login({ email, password });
+        setSuccessMessage(`Welcome back, ${user.name}! Redirecting...`);
         setTimeout(() => {
-          router.push(result.user.role === "owner" ? "/profile" : "/bookings");
+          router.push(user.role === "owner" ? "/profile" : "/bookings");
         }, 800);
       } else if (tab === "signup") {
-        const result = await apiRegister({
+        const result = await register({
           name,
           email,
           password,
@@ -221,8 +217,8 @@ function LoginForm() {
         setTab("verify_otp");
         setResendCooldown(60);
       } else if (tab === "verify_otp") {
-        const result = await apiVerifyOtp({ email, otp });
-        setSuccessMessage("Email verified successfully! Welcome to StayUp Stays.");
+        const user = await verifyOtp({ email, otp });
+        setSuccessMessage(`Email verified! Welcome, ${user.name}.`);
         setTimeout(() => {
           router.push("/profile");
         }, 900);
@@ -247,7 +243,7 @@ function LoginForm() {
     setServerError(null);
     setSuccessMessage(null);
     try {
-      const msg = await apiResendOtp(email);
+      const msg = await resendOtp(email);
       setSuccessMessage(msg);
       setResendCooldown(60);
     } catch (err: any) {
@@ -321,7 +317,7 @@ function LoginForm() {
               className="w-full py-2.5 px-4 rounded-xl bg-[#0a2560] hover:bg-[#1444a8] text-white font-black text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
               <Zap className="w-4 h-4 text-[#f97316]" />
-              <span>Instant Demo User Login (Alex Morgan)</span>
+              <span>Instant Demo Login (Demo User)</span>
             </button>
             <span className="text-[10px] text-slate-500 mt-1.5 block">
               Test full customer profile & reservations without backend
@@ -379,12 +375,20 @@ function LoginForm() {
         {/* ------------------------------------------------------------- */}
         {tab === "verify_otp" ? (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
-              <KeyRound className="w-8 h-8 text-[#0a2560] mx-auto mb-2" />
-              <p className="text-xs text-slate-600 font-medium">
-                We sent a 6-digit confirmation code to:
+            <div className="p-4 bg-sky-50/80 border border-sky-100 rounded-2xl text-center space-y-1">
+              <KeyRound className="w-8 h-8 text-[#0a2560] mx-auto mb-1" />
+              <p className="text-xs font-black text-[#0a2560] uppercase tracking-wider">
+                Gmail OTP Verification
               </p>
-              <p className="text-sm font-black text-slate-900 mt-0.5">{email}</p>
+              <p className="text-xs text-slate-600">
+                A 6-digit confirmation code was sent via Nodemailer to:
+              </p>
+              <p className="text-sm font-black text-slate-900 bg-white py-1 px-3 rounded-lg border border-slate-200 inline-block mt-0.5">
+                {email}
+              </p>
+              <p className="text-[11px] text-slate-500 pt-0.5">
+                Check your Gmail inbox or spam folder, then enter the code below.
+              </p>
             </div>
 
             <div>
@@ -474,7 +478,7 @@ function LoginForm() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Alex Morgan"
+                    placeholder="e.g. John Doe"
                     value={name}
                     onChange={(e) => {
                       setName(e.target.value);
@@ -745,7 +749,7 @@ function LoginForm() {
                   ? "Processing..."
                   : tab === "login"
                   ? "Sign In to StayUp"
-                  : "Create Account & Verify"}
+                  : "Create Account & Send OTP to Gmail"}
               </span>
               <ArrowRight className="w-4 h-4" />
             </button>

@@ -16,8 +16,7 @@ import {
   LogIn,
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
-import { getStoredUser } from "@/lib/auth-service";
-import { User } from "@/types/user";
+import { useAuth } from "@/context/AuthContext";
 
 const DESTINATION_LINKS = [
   { name: "Maldives", href: "/resorts?destination=Maldives" },
@@ -33,13 +32,9 @@ const DESTINATION_LINKS = [
 function PublicHeaderContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const { user: currentUser } = useAuth();
   const pathname = usePathname();
   const isHome = pathname === "/";
-
-  useEffect(() => {
-    setCurrentUser(getStoredUser());
-  }, [authModalOpen]);
 
   return (
     <>

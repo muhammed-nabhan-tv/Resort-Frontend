@@ -3,6 +3,79 @@ import { User, UserRole } from "@/types/user";
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+// -----------------------------------------------------------------------------
+// Backend Auth Types (Exact Match to backend auth.validation.ts & auth.controller.ts)
+// -----------------------------------------------------------------------------
+
+export interface RegisterInput {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string | null;
+  role?: "CUSTOMER" | "OWNER";
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface VerifyOtpInput {
+  email: string;
+  otp: string;
+}
+
+export interface ResendOtpInput {
+  email: string;
+}
+
+export interface BackendUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: "CUSTOMER" | "OWNER" | "ADMIN" | string;
+  isVerified?: boolean;
+  createdAt?: string;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  data: {
+    email: string;
+    name: string;
+    isVerified: boolean;
+  };
+}
+
+export interface VerifyOtpResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: BackendUser;
+    accessToken: string;
+    refreshToken?: string;
+  };
+}
+
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: BackendUser;
+    accessToken: string;
+  };
+}
+
+export interface ResendOtpResponse {
+  success: boolean;
+  message: string;
+  data: {
+    email: string;
+  };
+}
+
 export interface FieldErrors {
   name?: string;
   email?: string;
@@ -58,9 +131,10 @@ export function validateName(name: string): string | null {
   return null;
 }
 
-export function validatePhone(phone: string): string | null {
+export function validatePhone(phone?: string | null): string | null {
+  if (!phone) return null; // Optional in backend schema
   const trimmed = phone.trim();
-  if (!trimmed) return null; // Phone is optional in backend
+  if (!trimmed) return null;
   const phoneRegex = /^[0-9+\s\-()]{7,20}$/;
   if (!phoneRegex.test(trimmed)) {
     return "Invalid phone format (must be 7-20 digits with +, -, () allowed)";
@@ -118,8 +192,8 @@ export function getPasswordStrength(password: string): PasswordStrength {
 // Session & Local Storage Management
 // -----------------------------------------------------------------------------
 
-const STORAGE_KEY_USER = "stayup_auth_user";
-const STORAGE_KEY_TOKEN = "stayup_access_token";
+export const STORAGE_KEY_USER = "stayup_auth_user";
+export const STORAGE_KEY_TOKEN = "stayup_access_token";
 
 export function getStoredUser(): User | null {
   if (typeof window === "undefined") return null;
@@ -155,15 +229,8 @@ export function clearSession(): void {
 }
 
 // -----------------------------------------------------------------------------
-// Backend API Communication
+// Backend Mapping & API Client
 // -----------------------------------------------------------------------------
-
-interface ApiResponse<T = any> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  errors?: Array<{ field: string; message: string }>;
-}
 
 function normalizeRole(backendRole?: string): UserRole {
   if (!backendRole) return "customer";
@@ -173,7 +240,7 @@ function normalizeRole(backendRole?: string): UserRole {
   return "customer";
 }
 
-function mapBackendUserToFrontend(raw: any): User {
+export function mapBackendUserToFrontend(raw: BackendUser | any): User {
   return {
     id: raw.id || raw._id || `usr-${Date.now()}`,
     name: raw.name || "StayUp Traveler",
@@ -183,19 +250,53 @@ function mapBackendUserToFrontend(raw: any): User {
     avatar:
       raw.avatar ||
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-    joinedDate: raw.createdAt ? new Date(raw.createdAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+    joinedDate: raw.createdAt
+      ? new Date(raw.createdAt).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0],
     status: raw.isVerified === false ? "pending_verification" : "active",
     isVerified: Boolean(raw.isVerified ?? true),
   };
 }
 
-export async function apiRegister(payload: {
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-  role?: "CUSTOMER" | "OWNER";
-}): Promise<{ success: boolean; message: string; email: string; requiresOtp: boolean }> {
+/**
+ * Helper to make authenticated requests with JWT Bearer header and cookies.
+ * Ready for future backend endpoint connections!
+ */
+export async function authFetch(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const token = getStoredToken();
+  const url = endpoint.startsWith("http")
+    ? endpoint
+    : `${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+
+  const headers = new Headers(options.headers || {});
+  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: "include",
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Backend Functions (POST /api/auth/register, /login, /verify-otp, /resend-otp)
+// -----------------------------------------------------------------------------
+
+/**
+ * 1. Register a new user & trigger 6-digit OTP verification email
+ * Backend Endpoint: POST /api/auth/register
+ */
+export async function apiRegister(
+  payload: RegisterInput
+): Promise<{ success: boolean; message: string; email: string; requiresOtp: boolean }> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: "POST",
@@ -205,19 +306,19 @@ export async function apiRegister(payload: {
         name: payload.name.trim(),
         email: payload.email.toLowerCase().trim(),
         password: payload.password,
-        phone: payload.phone?.trim() || undefined,
+        phone: payload.phone ? payload.phone.trim() : undefined,
         role: payload.role || "CUSTOMER",
       }),
     });
 
-    const json: ApiResponse = await res.json().catch(() => ({
+    const json = await res.json().catch(() => ({
       success: false,
       message: `Server returned HTTP ${res.status}`,
     }));
 
     if (!res.ok || !json.success) {
       const errMsg =
-        json.errors?.map((e) => e.message).join(", ") ||
+        json.errors?.map((e: any) => e.message).join(", ") ||
         json.message ||
         "Registration failed. Please check your details.";
       throw new Error(errMsg);
@@ -232,17 +333,20 @@ export async function apiRegister(payload: {
   } catch (err: any) {
     if (err.name === "TypeError" && err.message.includes("fetch")) {
       throw new Error(
-        `Cannot connect to backend server at ${API_BASE_URL}. Ensure Resort-Backend is running, or use Instant Demo Login.`
+        `Backend server at ${API_BASE_URL} is currently offline. You can use Instant Demo User Login to test.`
       );
     }
     throw err;
   }
 }
 
-export async function apiVerifyOtp(payload: {
-  email: string;
-  otp: string;
-}): Promise<{ user: User; accessToken: string }> {
+/**
+ * 2. Verify 6-digit OTP code, activate account, and obtain auth tokens
+ * Backend Endpoint: POST /api/auth/verify-otp
+ */
+export async function apiVerifyOtp(
+  payload: VerifyOtpInput
+): Promise<{ user: User; accessToken: string }> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
       method: "POST",
@@ -254,7 +358,7 @@ export async function apiVerifyOtp(payload: {
       }),
     });
 
-    const json: ApiResponse = await res.json().catch(() => ({
+    const json = await res.json().catch(() => ({
       success: false,
       message: `Server returned HTTP ${res.status}`,
     }));
@@ -272,14 +376,16 @@ export async function apiVerifyOtp(payload: {
     };
   } catch (err: any) {
     if (err.name === "TypeError" && err.message.includes("fetch")) {
-      throw new Error(
-        `Cannot connect to backend server at ${API_BASE_URL}. Ensure Resort-Backend is running.`
-      );
+      throw new Error(`Backend server at ${API_BASE_URL} is currently offline.`);
     }
     throw err;
   }
 }
 
+/**
+ * 3. Resend fresh 6-digit OTP code to an unverified email
+ * Backend Endpoint: POST /api/auth/resend-otp
+ */
 export async function apiResendOtp(email: string): Promise<string> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/auth/resend-otp`, {
@@ -291,7 +397,7 @@ export async function apiResendOtp(email: string): Promise<string> {
       }),
     });
 
-    const json: ApiResponse = await res.json().catch(() => ({
+    const json = await res.json().catch(() => ({
       success: false,
       message: `Server returned HTTP ${res.status}`,
     }));
@@ -300,19 +406,22 @@ export async function apiResendOtp(email: string): Promise<string> {
       throw new Error(json.message || "Failed to resend OTP code.");
     }
 
-    return json.message || "A new 6-digit code has been sent to your email.";
+    return json.message || "A new 6-digit verification code has been sent to your email.";
   } catch (err: any) {
     if (err.name === "TypeError" && err.message.includes("fetch")) {
-      throw new Error(`Cannot connect to backend server at ${API_BASE_URL}.`);
+      throw new Error(`Backend server at ${API_BASE_URL} is currently offline.`);
     }
     throw err;
   }
 }
 
-export async function apiLogin(payload: {
-  email: string;
-  password: string;
-}): Promise<{ user: User; accessToken: string; requiresVerification?: boolean }> {
+/**
+ * 4. Authenticate an existing user and create a session
+ * Backend Endpoint: POST /api/auth/login
+ */
+export async function apiLogin(
+  payload: LoginInput
+): Promise<{ user: User; accessToken: string }> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
@@ -324,15 +433,20 @@ export async function apiLogin(payload: {
       }),
     });
 
-    const json: ApiResponse = await res.json().catch(() => ({
+    const json = await res.json().catch(() => ({
       success: false,
       message: `Server returned HTTP ${res.status}`,
     }));
 
     if (!res.ok || !json.success) {
       // Check if user is unverified (403: "Please verify your email before logging in.")
-      if (res.status === 403 || json.message?.toLowerCase().includes("verify your email")) {
-        const error: any = new Error(json.message || "Please verify your email before logging in.");
+      if (
+        res.status === 403 ||
+        json.message?.toLowerCase().includes("verify your email")
+      ) {
+        const error: any = new Error(
+          json.message || "Please verify your email before logging in."
+        );
         error.requiresVerification = true;
         error.email = payload.email.toLowerCase().trim();
         throw error;
@@ -350,7 +464,7 @@ export async function apiLogin(payload: {
   } catch (err: any) {
     if (err.name === "TypeError" && err.message.includes("fetch")) {
       throw new Error(
-        `Cannot connect to backend server at ${API_BASE_URL}. Ensure Resort-Backend is running, or use Instant Demo Login.`
+        `Backend server at ${API_BASE_URL} is currently offline. You can use Instant Demo User Login to test.`
       );
     }
     throw err;

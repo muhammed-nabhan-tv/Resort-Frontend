@@ -16,33 +16,35 @@ import {
   LogOut,
 } from "lucide-react";
 import { CURRENT_MOCK_USER } from "@/data/users";
-import { getStoredUser, clearSession } from "@/lib/auth-service";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CustomerProfilePage() {
   const router = useRouter();
-  const [name, setName] = useState(CURRENT_MOCK_USER.name);
-  const [email, setEmail] = useState(CURRENT_MOCK_USER.email);
-  const [phone, setPhone] = useState(CURRENT_MOCK_USER.phone);
+  const { user, logout, updateUserProfile } = useAuth();
+
+  const [name, setName] = useState(user?.name || CURRENT_MOCK_USER.name);
+  const [email, setEmail] = useState(user?.email || CURRENT_MOCK_USER.email);
+  const [phone, setPhone] = useState(user?.phone || CURRENT_MOCK_USER.phone);
   const [currency, setCurrency] = useState("USD ($)");
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   useEffect(() => {
-    const user = getStoredUser();
     if (user) {
       setName(user.name);
       setEmail(user.email);
       if (user.phone) setPhone(user.phone);
     }
-  }, []);
+  }, [user]);
 
   const handleSignOut = () => {
-    clearSession();
+    logout();
     router.push("/login");
   };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    updateUserProfile({ name, email, phone });
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
   };
@@ -141,13 +143,13 @@ export default function CustomerProfilePage() {
         <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={CURRENT_MOCK_USER.avatar}
+            src={user?.avatar || CURRENT_MOCK_USER.avatar}
             alt={name}
             className="w-16 h-16 rounded-full object-cover ring-4 ring-blue-50"
           />
           <div>
             <h2 className="text-lg font-bold text-slate-900">{name}</h2>
-            <p className="text-xs text-slate-500">Member since {CURRENT_MOCK_USER.joinedDate}</p>
+            <p className="text-xs text-slate-500">Member since {user?.joinedDate || CURRENT_MOCK_USER.joinedDate}</p>
             <span className="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
               Verified Account
             </span>
