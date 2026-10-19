@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -13,8 +13,10 @@ import {
   Heart,
   Award,
   ArrowLeft,
+  LogOut,
 } from "lucide-react";
 import { CURRENT_MOCK_USER } from "@/data/users";
+import { getStoredUser, clearSession } from "@/lib/auth-service";
 
 export default function CustomerProfilePage() {
   const router = useRouter();
@@ -24,6 +26,20 @@ export default function CustomerProfilePage() {
   const [currency, setCurrency] = useState("USD ($)");
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  useEffect(() => {
+    const user = getStoredUser();
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
+      if (user.phone) setPhone(user.phone);
+    }
+  }, []);
+
+  const handleSignOut = () => {
+    clearSession();
+    router.push("/login");
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,11 +79,21 @@ export default function CustomerProfilePage() {
       </div>
 
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Guest Profile</h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Manage your personal details, reservation preferences, and loyalty member status.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Guest Profile</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Manage your personal details, reservation preferences, and loyalty member status.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 text-xs font-bold transition-all cursor-pointer self-start sm:self-auto"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Sign Out</span>
+        </button>
       </div>
 
       {savedSuccess && (

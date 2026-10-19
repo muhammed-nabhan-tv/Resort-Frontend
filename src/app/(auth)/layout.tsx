@@ -14,13 +14,13 @@ export default function AuthLayout({
 
       {/* Minimal Header */}
       <header className="relative z-10 w-full max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-2xl bg-[#0a2560] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
-            <Compass className="w-6 h-6 text-[#ff4b38]" />
-          </div>
-          <span className="text-2xl font-black tracking-tight text-white">
-            Stay<span className="text-[#ff4b38]">Up</span>
-          </span>
+        <Link href="/" className="flex items-center gap-3 group">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/Logo/stayup_logo.png"
+            alt="StayUp Resorts & Stays"
+            className="h-12 sm:h-14 w-auto object-contain brightness-110 drop-shadow-md group-hover:scale-102 transition-transform"
+          />
         </Link>
         <Link
           href="/"

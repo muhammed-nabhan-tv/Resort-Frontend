@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -13,8 +13,11 @@ import {
   MapPin,
   Sparkles,
   Home,
+  LogIn,
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { getStoredUser } from "@/lib/auth-service";
+import { User } from "@/types/user";
 
 const DESTINATION_LINKS = [
   { name: "Maldives", href: "/resorts?destination=Maldives" },
@@ -30,8 +33,13 @@ const DESTINATION_LINKS = [
 function PublicHeaderContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const pathname = usePathname();
   const isHome = pathname === "/";
+
+  useEffect(() => {
+    setCurrentUser(getStoredUser());
+  }, [authModalOpen]);
 
   return (
     <>
@@ -50,9 +58,9 @@ function PublicHeaderContent() {
             <Link href="/" className="flex items-center gap-3 shrink-0 group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/logo/stayup_logo.png"
+                src="/Logo/stayup_logo.png"
                 alt="StayUp Resorts & Stays"
-                className={`h-10 sm:h-12 w-auto object-contain group-hover:scale-102 transition-transform ${
+                className={`h-14 sm:h-16 w-auto object-contain group-hover:scale-102 transition-transform ${
                   isHome ? "brightness-110 drop-shadow-md" : ""
                 }`}
               />
@@ -135,17 +143,32 @@ function PublicHeaderContent() {
               </Link>
 
               {/* Profile / Auth Button */}
-              <Link
-                href="/profile"
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm shadow-sm transition-all ${
-                  isHome
-                    ? "bg-[#0ea5e9] hover:bg-[#0284c7] text-white shadow-sky-500/30"
-                    : "bg-[#0ea5e9] hover:bg-[#0284c7] text-white shadow-sky-500/20"
-                }`}
-              >
-                <UserIcon className="w-4 h-4 text-white" />
-                <span>Profile</span>
-              </Link>
+              {currentUser ? (
+                <Link
+                  href="/profile"
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm shadow-sm transition-all ${
+                    isHome
+                      ? "bg-[#0ea5e9] hover:bg-[#0284c7] text-white shadow-sky-500/30"
+                      : "bg-[#0ea5e9] hover:bg-[#0284c7] text-white shadow-sky-500/20"
+                  }`}
+                >
+                  <UserIcon className="w-4 h-4 text-white" />
+                  <span>{currentUser.name.split(" ")[0]}</span>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAuthModalOpen(true)}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm shadow-sm transition-all cursor-pointer ${
+                    isHome
+                      ? "bg-[#0ea5e9] hover:bg-[#0284c7] text-white shadow-sky-500/30"
+                      : "bg-[#0a2560] hover:bg-[#1444a8] text-white shadow-blue-900/20"
+                  }`}
+                >
+                  <LogIn className="w-4 h-4 text-white" />
+                  <span>Sign In</span>
+                </button>
+              )}
             </div>
 
             {/* Mobile Actions */}
@@ -234,14 +257,28 @@ function PublicHeaderContent() {
                 <UserIcon className="w-4 h-4 text-[#0ea5e9]" />
                 <span>My Profile</span>
               </Link>
-              <Link
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="col-span-2 p-3 bg-[#0ea5e9] hover:bg-[#0284c7] text-white rounded-xl flex items-center justify-center gap-2 text-center font-bold transition-colors"
-              >
-                <UserIcon className="w-4 h-4 text-white" />
-                <span>Sign In / Demo Login</span>
-              </Link>
+              {currentUser ? (
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="col-span-2 p-3 bg-sky-50 text-[#0ea5e9] rounded-xl flex items-center justify-center gap-2 text-center font-bold transition-colors"
+                >
+                  <UserIcon className="w-4 h-4 text-[#0ea5e9]" />
+                  <span>Logged in as {currentUser.name}</span>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setAuthModalOpen(true);
+                  }}
+                  className="col-span-2 p-3 bg-[#0ea5e9] hover:bg-[#0284c7] text-white rounded-xl flex items-center justify-center gap-2 text-center font-bold transition-colors cursor-pointer"
+                >
+                  <UserIcon className="w-4 h-4 text-white" />
+                  <span>Sign In / Register</span>
+                </button>
+              )}
             </div>
           </div>
         )}
